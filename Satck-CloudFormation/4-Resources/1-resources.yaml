@@ -24,3 +24,4 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref MyEc2Instance
+      ##criação de uma maquina para operação
