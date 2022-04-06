@@ -6,4 +6,4 @@ Resources:
       AvailabilityZone: us-east-2a
       ImageId: ami-09662e4f2b2fb67f9
       InstanceType: t2.micro
-      # teste ok
+      
