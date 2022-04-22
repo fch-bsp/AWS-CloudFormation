@@ -14,8 +14,8 @@ Resources:
   MyEc2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: us-east-1a
-      ImageId: ami-a4c7edb2
+      AvailabilityZone: us-east-2a
+      ImageId: ami-0fb653ca2d3203ac1
       InstanceType: t2.micro
       SecurityGroups:
         - !Ref MySecurityGroupSSH
