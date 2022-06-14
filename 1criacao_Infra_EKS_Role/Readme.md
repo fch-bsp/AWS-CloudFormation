@@ -4,8 +4,8 @@
 * VPC- Classe A (192.168.0.0/16)
 * 2 subnets Public 2 Private-Classe A 
 * total de 16384 pra cada subnet (192.168.0.0/18-192.168.64.0/18-192.168.128.0/18-192.168.192.0/18)
-* Internet gateways
-* Route tables
+* 1 Internet gateways
+* 1 Route tables
 * 2 NAT gateways
 
 
