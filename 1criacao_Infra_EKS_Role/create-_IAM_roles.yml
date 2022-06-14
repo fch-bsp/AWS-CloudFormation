@@ -3,7 +3,7 @@ Description: create IAM roles for EKS usage upfront
 Parameters:
   EnvironmentName:
     Type: String
-    Default: Eks-Role
+    Default: Eks-Stack-Role
     Description: "Um nome que será usado para o namespace de todos os recursos do cluster"
 
 Resources:
@@ -115,7 +115,38 @@ Resources:
                 - "ec2:DescribeVpcs"
                 - "eks:DescribeCluster"
               Resource: '*'  
+              
+# stack Role policy              
             
+  EKSServicePolicy:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: eks-service
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                - "ec2:CreateNetworkInterface"
+                - "ec2:CreateNetworkInterfacePermission"
+                - "ec2:DeleteNetworkInterface"
+                - "ec2:DescribeInstances"
+                - "ec2:DescribeNetworkInterfaces"
+                - "ec2:DetachNetworkInterface"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:DescribeSubnets"
+                - "ec2:DescribeVpcs"
+                - "ec2:ModifyNetworkInterfaceAttribute"
+                - "iam:ListAttachedRolePolicies"
+                - "eks:UpdateClusterVersion"
+              Resource: '*'
 
 Outputs:
   EKSClusterRole:
@@ -128,4 +159,10 @@ Outputs:
     Value: !GetAtt 'EKSWorkerNodeRole.Arn'
     Export:
       Name: !Sub ${EnvironmentName}:eks-work-node
+  EKSServicePolicy:
+    Description: The ARN of the Eks Node
+    Value: !GetAtt 'EKSServicePolicy.Arn'
+    Export:
+      Name: !Sub ${EnvironmentName}:eks-service
+      
   
