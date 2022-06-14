@@ -44,6 +44,8 @@ aws cloudformation create-stack \
 
 Commando:  
 
+```bash
+
 aws iam create-role \
 --region us-east-2 \
 --role-name EKSClusterPolicy \
@@ -53,14 +55,15 @@ aws iam create-role \
 # Acessar kubconfig 
 
 
+
 aws eks update-kubeconfig \
 --region us-east-2 \
---name my-cluster
+--name <nome do cluster>
 
 
 # criação de uma chave SSH 
 
 aws ec2 create-key-pair \
 --region us-east-2 \
---key-name mykeypair
+--key-name <nome chave>
 
