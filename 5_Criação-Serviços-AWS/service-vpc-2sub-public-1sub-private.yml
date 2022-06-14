@@ -1,0 +1,166 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Recursos principais da AWS para criar um cluster do ECS abrangendo sub-redes públicas e privadas. Apoia
+             balanceadores de carga voltados para o público
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: vpc-Exemplo # Nome da VPC podendo trocar
+
+
+Mappings:
+  SubnetConfig:  #CRIAÇÃO DE 1 VPC COM 2 SUB PUBLIC E 2 SUB PRIVATE COM IG/RT/SG E ELB 
+    VPC:
+      CIDR: '10.0.0.0/16'  # CLASSE A 10.0.0.0/16 ## CLASSE B 172.16.0.0/16 ## CLASSE C 192.168.0.0 /16
+    PublicOne:
+      CIDR: '10.0.0.0/24'
+    PublicTwo:
+      CIDR: '10.0.1.0/24'
+    PrivateOne:
+      CIDR: '10.0.2.0/24'
+    PrivateTwo:
+      CIDR: '10.0.3.0/24'
+Resources:
+  VPC:  #CRIAÇÃO DA VPC 
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+
+  PublicSubnetOne: #CRIAÇÃO DA 1 SUB PUBLIC 
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicOne', 'CIDR']
+      MapPublicIpOnLaunch: true
+  PublicSubnetTwo: #CRIAÇÃO DA 2 SUB PUBLIC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicTwo', 'CIDR']
+      MapPublicIpOnLaunch: true
+
+  PrivateSubnetOne:  #CRIAÇÃO DA 1 SUB PRIVATE
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PrivateOne', 'CIDR']
+  PrivateSubnetTwo:  #CRIAÇÃO DA 2 SUB PRIVATE
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PrivateTwo', 'CIDR']
+
+  InternetGateway:  #CRIAÇÃO DA DO IG 
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachement:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+  PublicRouteTable:  #CRIAÇÃO DA DO RT
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachement
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'  # CRIANDO ROTA E APONTANDO PARA O IG !REF 
+  PublicSubnetOneRouteTableAssociation:  #APONTAMENTO RT PARA SUB 1 PUBLIC
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetOne
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetTwoRouteTableAssociation:  #APONTAMENTO RT PARA SUB 1 PUBLIC
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetTwo  #APONTAMENTO RT PARA SUB 2 PUBLIC
+      RouteTableId: !Ref PublicRouteTable
+
+  NatGatewayOneAttachment:  #CRIAÇÃO DO RECURSO Nat 1
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachement
+    Properties:
+        Domain: vpc
+  NatGatewayTwoAttachment:  #CRIAÇÃO DO RECURSO Nat 2
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachement
+    Properties:
+        Domain: vpc
+  NatGatewayOne:  #CRIAÇÃO DO RECURSO Nat 1 atach 
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayOneAttachment.AllocationId
+      SubnetId: !Ref PublicSubnetOne  #ATACH NA SUB 1 PRIVATE
+  NatGatewayTwo:  #CRIAÇÃO DO RECURSO Nat 2 atach 
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayTwoAttachment.AllocationId
+      SubnetId: !Ref PublicSubnetTwo  #ATACH NA SUB 2 PRIVATE
+  PrivateRouteTableOne:  #CRIAÇÃO DE UM RT PARA AS SUB PRIVATE
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PrivateRouteOne: #CRIAÇÃO DE UM RT PARA AS SUB PRIVATE
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableOne  #ATACH NA SUB 1 PRIVATE
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayOne
+  PrivateRouteTableOneAssociation:  #atach na sub private 1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableOne
+      SubnetId: !Ref PrivateSubnetOne
+  PrivateRouteTableTwo:  #atach na sub private 1
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PrivateRouteTwo:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableTwo  #ATACH NA SUB 1 PRIVATE
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayTwo
+  PrivateRouteTableTwoAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableTwo
+      SubnetId: !Ref PrivateSubnetTwo
+
+
+######################################  ########################################  #####################################
+Outputs:
+  VpcId:
+    Description: The ID of the VPC that this stack is deployed in
+    Value: !Ref 'VPC'  # UMA VPC
+  PublicSubnetOne:
+    Description: Public subnet one    #SUB PUBLIC
+    Value: !Ref 'PublicSubnetOne'
+  PublicSubnetTwo:
+    Description: Public subnet two    #SUB PUBLIC
+    Value: !Ref 'PublicSubnetTwo'
+  PrivateSubnetOne:
+    Description: Private subnet one   #SUB PRIVATE
+    Value: !Ref 'PrivateSubnetOne'
+  PrivateSubnetTwo:
+    Description: Private subnet two   #SUB PRIVATE
+    Value: !Ref 'PrivateSubnetTwo'
+  
+  
+
