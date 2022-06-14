@@ -5,30 +5,34 @@ Description: 'Amazon EKS Sample VPC - Private and Public subnets'
 
 Parameters:
 
+# Podemos usas as 3 classes A=10.0.0.0/16 B=172.16.0.0/16 C=19.168.0.0/16 VPC
+
   VpcBlock:
     Type: String
     Default: 192.168.0.0/16
-    Description: The CIDR range for the VPC. This should be a valid private (RFC 1918) CIDR range.
+    Description: O intervalo CIDR para a VPC. Este deve ser um intervalo CIDR privado válido (RFC 1918).
+
+# Podemos usas as 3 classes A=10.0.0.0/18 B=172.16.0.0/18 C=19.168.0.0/15 SUBNETS
 
   PublicSubnet01Block:
     Type: String
     Default: 192.168.0.0/18
-    Description: CidrBlock for public subnet 01 within the VPC
+    Description: CidrBlock para a sub-rede pública 01 na VPC
 
   PublicSubnet02Block:
     Type: String
     Default: 192.168.64.0/18
-    Description: CidrBlock for public subnet 02 within the VPC
+    Description: CidrBlock para a sub-rede pública 02 na VPC
 
   PrivateSubnet01Block:
     Type: String
     Default: 192.168.128.0/18
-    Description: CidrBlock for private subnet 01 within the VPC
+    Description: CidrBlock para sub-rede privada 01 na VPC
 
   PrivateSubnet02Block:
     Type: String
     Default: 192.168.192.0/18
-    Description: CidrBlock for private subnet 02 within the VPC
+    Description: CidrBlock para sub-rede privada 02 na VPC
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -280,7 +284,7 @@ Outputs:
     Value: !Join [ ",", [ !Ref PublicSubnet01, !Ref PublicSubnet02, !Ref PrivateSubnet01, !Ref PrivateSubnet02 ] ]
 
   SecurityGroups:
-    Description: Security group for the cluster control plane communication with worker nodes
+    Description: Grupo de segurança para a comunicação do plano de controle do cluster com nós do work
     Value: !Join [ ",", [ !Ref ControlPlaneSecurityGroup ] ]
 
   VpcId:

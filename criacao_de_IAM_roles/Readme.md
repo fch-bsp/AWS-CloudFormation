@@ -2,8 +2,9 @@
 
 ## EC2InstanceRole  
 
-> Allows EC2 instances in an ECS cluster to access ECS.
-> Used primarily by the container agent running on the EC2 box(es)
+>Permite que instâncias do EC2 em um cluster do ECS acessem o ECS.
+
+> Usado principalmente pelo agente de contêiner em execução na(s) caixa(s) EC2
 
 - open AWS mgm console
 - go to service IAM
@@ -18,7 +19,7 @@
 
 ## ECSRole  
 
-> Allows ECS to create and manage AWS resources on your behalf
+> Permite que o ECS crie e gerencie recursos da AWS em seu nome
 
 - open AWS mgm console
 - go to service IAM
@@ -33,7 +34,7 @@
 
 ## ECSTaskExecutionRole
 
-> Allows ECS tasks to call AWS services on your behalf.
+>Permite que as tarefas do ECS chamem os serviços da AWS em seu nome.
 
 - open AWS mgm console
 - go to service IAM
@@ -48,7 +49,7 @@
 
 ## ECSAutoscalingRole
 
-> Allows Auto Scaling to access and update ECS services
+> Permite que o Auto Scaling acesse e atualize os serviços do ECS
 
 - open AWS mgm console
 - go to service IAM
