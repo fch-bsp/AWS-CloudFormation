@@ -6,7 +6,7 @@
 * total de 16384 pra cada subnet (192.168.0.0/18-192.168.64.0/18-192.168.128.0/18-192.168.192.0/18)
 * Internet gateways
 * Route tables
-* NAT gateways
+* 2 NAT gateways
 
 
 Commando:  
