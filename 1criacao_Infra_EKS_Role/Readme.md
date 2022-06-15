@@ -9,7 +9,7 @@
 * 2 NAT gateways
 
 
-Commando:  123
+Commando:  
 
 
 ``bash
