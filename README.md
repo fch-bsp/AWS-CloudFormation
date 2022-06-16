@@ -10,4 +10,6 @@
  ## ECS
  ## EKS
  ## RDS
+ ## S3
+ ## LAMBDA
 
