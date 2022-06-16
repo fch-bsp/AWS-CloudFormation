@@ -1,9 +1,9 @@
 # Create core AWS infrastructure
 # https://www.site24x7.com/pt/tools/ipv4-sub-rede-calculadora.html
 
-* VPC- Classe A (192.168.0.0/16)
-* 2 subnets Public 2 Private-Classe A 
-* total de 16384 pra cada subnet (192.168.0.0/18-192.168.64.0/18-192.168.128.0/18-192.168.192.0/18)
+* VPC- Classe c (192.168.0.0/16)
+* 2 subnets Public 2 Private-  Classe c 
+* total de 16384 pra cada subnet (192.168.0.0/18 >> 192.168.64.0/18 >> 192.168.128.0/18 >> 192.168.192.0/18)
 * 1 Internet gateways para as duas subnetPublic
 * 2 Route tables um para cada subnets
 * 2 NAT gateways um para cada subnetPrivate 
