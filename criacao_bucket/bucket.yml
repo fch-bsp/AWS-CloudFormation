@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: create IAM roles for S3 - Full 
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: MyBucket
+    Description: "Criacao de Bucket."
+
+Resources:
+  MyBucketcodedeploy2525:
+    Type: "AWS::S3::Bucket"
+    Properties: {}
+
+Outputs:
+  MyBucketcodedeploy2525:
+    Description: Criacao Bucket 
+    Value: !GetAtt 'MyBucketcodedeploy2525.Arn'
+    Export:
+      Name: !Sub ${EnvironmentName}:MyBucketcodedeploy2525
+

@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: create IAM roles for S3 - Full 
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: Role-Ec2-S3
+    Description: "A name that will be used for namespacing all cluster resources."
+
+Resources:
+
+  RoleS3Coddeploy:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: [sts:AssumeRole]
+      Path: /
+      Policies:
+      - PolicyName: s3-role
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - 's3:*'
+              - 's3-object-lambda:*'
+            Resource: '*'
+
+  RoleCoddeploy:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [codedeploy.amazonaws.com]
+          Action: [sts:AssumeRole]
+      Path: /
+      Policies:
+      - PolicyName: role-CodeDeploy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - "autoscaling:CompleteLifecycleAction"
+              - "autoscaling:DeleteLifecycleHook"
+              -  "autoscaling:DescribeAutoScalingGroups"
+              -  "autoscaling:DescribeLifecycleHooks"
+              -  "autoscaling:PutLifecycleHook"
+              -  "autoscaling:RecordLifecycleActionHeartbeat"
+              -  "autoscaling:CreateAutoScalingGroup"
+              -  "autoscaling:UpdateAutoScalingGroup"
+              -  "autoscaling:EnableMetricsCollection"
+              -  "autoscaling:DescribePolicies"
+              -  "autoscaling:DescribeScheduledActions"
+              -  "autoscaling:DescribeNotificationConfigurations"
+              -  "autoscaling:SuspendProcesses"
+              -  "autoscaling:ResumeProcesses"
+              -  "autoscaling:AttachLoadBalancers"
+              -  "autoscaling:AttachLoadBalancerTargetGroups"
+              -  "autoscaling:PutScalingPolicy"
+              -  "autoscaling:PutScheduledUpdateGroupAction"
+              -  "autoscaling:PutNotificationConfiguration"
+              -  "autoscaling:PutWarmPool"
+              -  "autoscaling:DescribeScalingActivities"
+              -  "autoscaling:DeleteAutoScalingGroup"
+              -  "ec2:DescribeInstances"
+              -  "ec2:DescribeInstanceStatus"
+              -  "ec2:TerminateInstances"
+              -  "tag:GetResources"
+              -  "sns:Publish"
+              -  "cloudwatch:DescribeAlarms"
+              -  "cloudwatch:PutMetricAlarm"
+              -  "elasticloadbalancing:DescribeLoadBalancers"
+              -  "elasticloadbalancing:DescribeInstanceHealth"
+              -  "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+              -  "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
+              -  "elasticloadbalancing:DescribeTargetGroups"
+              -  "elasticloadbalancing:DescribeTargetHealth"
+              -  "elasticloadbalancing:RegisterTargets"
+              -  "elasticloadbalancing:DeregisterTargets"
+            Resource: '*'
+  
+
+Outputs:
+  RoleS3Coddeploy:
+    Description: The ARN of the role used for CodeDeploy
+    Value: !GetAtt 'RoleS3Coddeploy.Arn'
+    Export:
+      Name: !Sub ${EnvironmentName}:RoleS3Coddeploy
+
+  RoleCoddeploy:
+    Description: The ARN of the role used for CodeDeploy
+    Value: !GetAtt 'RoleCoddeploy.Arn'
+    Export:
+      Name: !Sub ${EnvironmentName}:RoleCoddeploy
