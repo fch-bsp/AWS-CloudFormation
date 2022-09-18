@@ -1,0 +1,22 @@
+Parameters:
+  ServerIP:
+    Type: String
+    Description: Web Server IP
+
+  Port:
+    Type: Number
+    Default: 8080
+
+Resources:
+  CustomResourceSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Sub "http://${ServerIP}:${Port}"
+          Protocol: http
+
+Outputs:
+  SNSTopicCustomResource:
+    Value: !Ref CustomResourceSNSTopic
+    Export:
+      Name: SNSTopicCustomResource

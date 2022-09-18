@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Count Macro
+  A simple iterator for creating multipleidentical resources
+
+Resources:
+  Macro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: Count
+      FunctionName: !GetAtt CountMacroFunction.Arn
+  
+  CountMacroFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python3.8
+      Timeout: 360
+      Role: !GetAtt AWSLambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import copy
+          import json
+
+          def process_template(template, parameters):
+            new_template = copy.deepcopy(template)
+            status = 'success'
+
+            for name, resource in template['Resources'].items():
+              if 'Count' in resource:
+
+                # Check if the value of Count is referenced to a parameter passed in the template
+                try:
+                  refValue = new_template['Resources'][name]['Count'].pop('Ref')
+                  # Convert referenced parameter to an integer value
+                  count = int(parameters[refValue])
+                  # Remove the Count property from this resource
+                  new_template['Resources'][name].pop('Count')
+                
+                except AttributeError:
+                  # Use numeric Count value
+                  count = new_template['Resources'][name].pop('Count')
+                
+                print("Found 'Count' property with value {} in '{}' resource...multiplying!".format(count, name))
+
+                # Remove the original resource from the template but take a local copy of it
+                resourceToMultiply = new_template['Resources'].pop(name)
+
+                # Create a new block of the resource muliplied with names ending in the iterator and the placeholders substituted
+                resourcesAfterMultiplication = multiply(name, resourceToMultiply, count)
+
+                if not set(resourcesAfterMultiplication.keys()) & set(new_template['Resources'].keys()):
+                  new_template['Resources'].update(resourcesAfterMultiplication)
+                else:
+                  status = 'failed'
+                  return status, template
+              
+              else:
+                print("Did not find 'Count' property in '{}' resource...Nothing to do!".format(name))
+            
+            return status, new_template
+        
+          def update_placeholder(resource_structure, iteration):
+
+            # Convert the json into a string
+            resourceString = json.dumps(resource_structure)
+
+            # Count the number of times the placeholder is found in the string
+            placeHolderCount = resourceString.count('%d')
+
+            # If the placeholder is found then replace it
+            if placeHolderCount > 0:
+              print ("Found {} occurrences of decimal placeholder in JSON, replacing with iterator value {}".format(placeHolderCount, iteration))
+
+              # Make a list of the values that we will use to replace the decimal placeholders - the values will all be the same
+              placeHolderReplacementValues = [iteration] * placeHolderCount
+
+              # Replace the decimal placeholders using the list - the syntax below expands the list
+              resourceString = resourceString % (*placeHolderReplacementValues,)
+
+              # Convert the string back to JSON and return it
+              return json.loads(resourceString)
+
+            else:
+              print("No occurrences of decimal placeholder found in JSON, therefore nothing will be replaced")
+              return resource_structure
+          
+          def multiply(resource_name, resource_structure, count):
+            resources = {}
+
+            # Loop according to the number of times we want to multiply, creating a new resource each time
+            for iteration in range(1, (count + 1)):
+              print("Multiplying '{}', iteration count {}".format(resource_name, iteration))
+              multipliedResourceStructure = update_placeholder(resource_structure, iteration)
+              resources[resource_name + str(iteration)] = multipliedResourceStructure
+            
+            return resources
+          
+          def handler(event, context):
+            result = process_template(event['fragment'], event['templateParameterValues'])
+
+            return {
+              'requestId': event['requestId'],
+              'status': result[0],
+              'fragment': result[1]
+            }
+
+  AWSLambdaExecutionRole:
+     Type: AWS::IAM::Role
+     Properties:
+       AssumeRolePolicyDocument:
+         Statement:
+         - Action:
+           - sts:AssumeRole
+           Effect: Allow
+           Principal:
+             Service:
+             - lambda.amazonaws.com
+         Version: '2012-10-17'
+       Path: "/"
+       Policies:
+       - PolicyDocument:
+           Statement:
+           - Action:
+             - logs:CreateLogGroup
+             - logs:CreateLogStream
+             - logs:PutLogEvents
+             Effect: Allow
+             Resource: arn:aws:logs:*:*:*
+           Version: '2012-10-17'
+         PolicyName: !Sub ${AWS::StackName}-${AWS::Region}-AWSLambda-CW
+       RoleName: !Sub ${AWS::StackName}-${AWS::Region}-AWSLambdaExecutionRole

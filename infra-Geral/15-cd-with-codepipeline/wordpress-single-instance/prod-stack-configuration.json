@@ -1,0 +1,9 @@
+{
+  "Parameters" : {
+    "DBName" : "ProdWordPressDB",
+    "DBPassword" : "mysupersecretprodpassword",
+    "DBRootPassword" : "mysupersecretprodpassword",
+    "DBUser" : "ProdDBuser",    
+    "KeyName" : "DemoKeyPair"
+  }
+}

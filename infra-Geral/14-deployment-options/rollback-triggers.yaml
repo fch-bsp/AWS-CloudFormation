@@ -1,0 +1,31 @@
+Parameters:
+  TableName:
+    Type: String
+    Description: The name of our DynamoDB table
+  RCU:
+    Type: Number
+    Default: 5
+    Description: How many RCU to provide to the table
+    
+Resources:
+  MyDDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - 
+          AttributeName: "Album"
+          AttributeType: "S"
+        - 
+          AttributeName: "Artist"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "Album"
+          KeyType: "HASH"
+        -
+          AttributeName: "Artist"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref RCU
+        WriteCapacityUnits: 5  

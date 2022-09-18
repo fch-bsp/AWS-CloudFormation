@@ -1,0 +1,6 @@
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # this bucket already exists globally
+      BucketName: test

@@ -1,0 +1,8 @@
+Resources:
+  MySeleniumTest:
+    Type: Custom::SeleniumTester
+    Properties:
+      ServiceToken: !ImportValue SNSTopicCustomResource
+      seleniumTester: 'SeleniumTest'
+      endpoints: [ "http://mysite.com", "http://myecommercesite.com", "http://search.mysite.com" ]
+      frequencyOfTestsPerHour: [ "3", "2", "4", "1" ]
