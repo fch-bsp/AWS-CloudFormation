@@ -31,7 +31,7 @@ Parameters:
 
 Resources:
   
-  # ECS Recursos do cluster
+  # ECS Recursos do cluster teste 
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
