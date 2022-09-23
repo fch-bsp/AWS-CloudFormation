@@ -26,8 +26,8 @@ Resources:
         FromPort: 22
         IpProtocol: tcp
         ToPort: 22
-        CidrIp: 201.81.9.**18/32 # especificar ip
- 
+        CidrIp: 177.92.91.878/32 # especificar ip
+    
 
   # our second EC2 security group
   ServerSecurityGroup:
