@@ -1,0 +1,101 @@
+---
+  Resources:
+    VPCCliente:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 10.0.0.0/16 ## ou 172.0.0.0/16 ou 192.168.0.0/16
+        EnableDnsSupport: 'true'
+        EnableDnsHostnames: 'true'
+## CRIAÇÃO DE 2 SUBNETS PUBLIC
+    PublicSubnetA:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPCCliente
+        CidrBlock: 10.0.1.0/24
+
+    PublicSubnetB:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPCCliente
+        CidrBlock: 10.0.2.0/24
+## CRIAÇÃO DE 2 SUBNETS PRIVATE
+    PrivateSubnetA:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPCCliente
+        CidrBlock: 10.0.3.0/24
+
+    PrivateSubnetB:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPCCliente
+        CidrBlock: 10.0.4.0/24
+## CRIAÇÃO DA INTERNET GATEWAY 
+    IGW:
+      Type: AWS::EC2::InternAWS::EC2::InternetGateway
+
+    AttachIGW:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId: !Ref VPCCliente
+        InternetGatewayId: !Ref IGW 
+## CRIAÇÃO DO ROUTER TABLE 
+    RT:
+    Type: AWS::EC2::RouteTable 
+    Properties:
+    VpcId: !Ref VPCCliente
+
+    RTtoIGW:
+      Type: AWS::EC2::Route 
+      DependsOn: IGW 
+      Properties:
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId:  !Ref IGW 
+        RouteTableId: !Ref RT 
+
+    RTAssoc:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: !Ref RT
+        SubnetId: !Ref PrivateSubnetA
+
+    Instance:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: ami-0533f2ba8a1995cf9
+        InstanceType: t2.micro
+        SubnetId: !Ref PrivateSubnetA
+        SecurityGroup: !Ref SGCliente
+
+    Topico:
+      Type: AWS::SNS::Topic
+      Properties:
+      Subscription:
+      - Endpoint: "exemplo@arroba.com"
+        Protocol: email 
+      TopicName: "Topico"
+
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private 
+        BucketName: fch-cloud-bucket-2020
+
+    SGCliente:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Libera porta 22
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: '22'
+            ToPort: '22'
+            CidrIp: 0.0.0.0/0
+        VpcId: !Ref VPCCliente
+
+
+
+
+
+
+
+
